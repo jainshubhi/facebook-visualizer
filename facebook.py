@@ -61,7 +61,7 @@ def teardown_request(exception):
 # show names of all friends in db
 @app.route('/')
 def show_friends():
-    friends = query_db('SELECT NAME FROM friends')
+    friends = flatten_tuple(query_db('SELECT NAME FROM friends'))
     return render_template('show_friends.html', friends=friends)
 
 # refresh data regarding friends from facebook
@@ -125,7 +125,17 @@ def logout():
 
 @app.route('/graph')
 def graph():
-    return render_template('show_graphs.html')
+    friends = flatten_tuple(query_db('SELECT NAME FROM friends'))
+    # Convert from unicode to UTF8
+    friends = [x.encode('UTF8') for x in friends]
+    letter_map = {}
+    for friend in friends:
+        if friend[0] in letter_map.keys():
+            letter_map[friend[0]] += 1
+        else:
+            letter_map[friend[0]] = 1
+    print letter_map
+    return render_template('show_graphs.html', data=letter_map)
 
 # fire up server
 if __name__ == '__main__':
