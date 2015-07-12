@@ -71,7 +71,7 @@ def refresh_friends():
         abort(401)
     friends = flatten_tuple(query_db('SELECT NAME FROM friends'))
     # token = generate_token()
-    token = 'CAACEdEose0cBAN9Ex2HoNW0ppDZBUhSXOf45uZAq1OzZA3HcV8wGwXura69knSB9idu2cW2gGdFIEmZAp3j9TJ7RBaaaZC7lzHbFFW1KhJecECYZCVWATUDc7vPeiBHk4osy2F1RBf433ngWK7zHsTy4pYJwbvEzVD8mywVHZBzPZA0URE8dNbqB5lzNr7OmmDDtzxXBtdmvi4OkO5kDVt1URZB8vpNruResZD'
+    token = 'CAACEdEose0cBAJmhU9HGWjRC8ibHRMrXZA8vBbkh9fFNMKeB7ZBnrT1OsSZCyHLxq6FJhj7Sfy0U6ZC5pCFAuMjjq4Euddh2IezW1Ytg2ohUXBIMZCl9V7pfLH86GvcUMciT2m13YXWziTZChPLOFfH1tODlIKsgVz4N7JjOTx1qMY7RJpY03ZAZC525CmgA1cVNxaI74AKjZAxMNNB9ZCsJ1fCoT8XkW7KqoZD'
     req = requests.get('https://graph.facebook.com/me/friends?access_token=' + token).json()
     has_new_friends = False
     for friend in req['data']:
@@ -86,6 +86,7 @@ def refresh_friends():
         flash('No new friends for you Senor!')
     return redirect(url_for('show_friends'))
 
+# query_db returns as a tuple with two elements (and empty last element)
 def flatten_tuple(lst_of_tup):
     lst = []
     for tup in lst_of_tup:
@@ -128,12 +129,12 @@ def graph():
     friends = flatten_tuple(query_db('SELECT NAME FROM friends'))
     # Convert from unicode to UTF8
     friends = [x.encode('UTF8') for x in friends]
-    letter_map = {}
+    letter_map = {'A': 0,'B': 0,'C': 0,'D': 0,'E': 0,'F': 0,'G': 0,'H': 0,
+                  'I': 0,'J': 0, 'K': 0,'L': 0,'M': 0,'N': 0,'O': 0,'P': 0,
+                  'Q': 0,'R': 0,'S': 0,'T': 0,'U': 0,'V': 0,'W': 0,'X': 0,
+                  'Y': 0,'Z': 0}
     for friend in friends:
-        if friend[0] in letter_map.keys():
             letter_map[friend[0]] += 1
-        else:
-            letter_map[friend[0]] = 1
     print letter_map
     return render_template('show_graphs.html', data=letter_map)
 

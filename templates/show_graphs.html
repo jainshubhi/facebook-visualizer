@@ -5,8 +5,8 @@
   <script type="text/javascript" src="http://code.highcharts.com/modules/exporting.js"></script>
   <div id="container" style="width: 100%; height: 400px; margin: 0 auto"></div>
   <script type="text/javascript">
-  // FIXME: This should be in python
   var dict = {{ data|safe }};
+  console.log(dict)
   $(function () {
       $('#container').highcharts({
           chart: {
