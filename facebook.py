@@ -99,11 +99,6 @@ def query_db(query, args=(), one=False):
     cur.close()
     return (rv[0] if rv else None) if one else rv
 
-# generate FB API access token
-def generate_token():
-    token = requests.get('https://graph.facebook.com/oauth/access_token?client_id=' + APP_ID + '&client_secret=' + APP_SECRET + '&grant_type=' + CLIENT_CREDENTIALS).json()
-    return token['access_token']
-
 # method to login to app
 @app.route('/login', methods=['GET', 'POST'])
 def login():

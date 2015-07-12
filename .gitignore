@@ -64,4 +64,4 @@ target/
 .DS_Store
 
 # jsons for config data
-.json
+*.json
