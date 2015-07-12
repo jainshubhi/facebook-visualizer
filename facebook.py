@@ -71,7 +71,7 @@ def refresh_friends():
         abort(401)
     friends = flatten_tuple(query_db('SELECT NAME FROM friends'))
     # token = generate_token()
-    token = 'CAACEdEose0cBAPOGrAMKOTfHDMdAm8RDpHNhzqFZAggGXr4DvhvmIX1dWGA9Yg50zeKfKFN3GBAjvOAsxahCcdbsEZA4ItBkZCwBsJhlglco4cchi50GFvJEArR0Ff5BJ4aptUFZCDgwyqyVyHwdP2m0ACW4PAazEwDo6r3zcd6u1GzJ7dclhHZCLZCqirZAYT9c9WDf4GoSPCVvNumsYQtarSC7DJfOrIZD'
+    token = 'CAACEdEose0cBAN9Ex2HoNW0ppDZBUhSXOf45uZAq1OzZA3HcV8wGwXura69knSB9idu2cW2gGdFIEmZAp3j9TJ7RBaaaZC7lzHbFFW1KhJecECYZCVWATUDc7vPeiBHk4osy2F1RBf433ngWK7zHsTy4pYJwbvEzVD8mywVHZBzPZA0URE8dNbqB5lzNr7OmmDDtzxXBtdmvi4OkO5kDVt1URZB8vpNruResZD'
     req = requests.get('https://graph.facebook.com/me/friends?access_token=' + token).json()
     has_new_friends = False
     for friend in req['data']:
@@ -122,6 +122,10 @@ def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
     return redirect(url_for('show_friends'))
+
+@app.route('/graph')
+def graph():
+    return render_template('show_graphs.html')
 
 # fire up server
 if __name__ == '__main__':
