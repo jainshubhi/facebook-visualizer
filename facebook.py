@@ -23,10 +23,10 @@ SECRET_KEY = 'development key'
 USERNAME = 'admin'
 PASSWORD = 'default'
 
-# facebook app configuration
-APP_ID =
-APP_SECRET =
-CLIENT_CREDENTIALS =
+# # facebook app configuration
+# APP_ID =
+# APP_SECRET =
+# CLIENT_CREDENTIALS =
 
 # create our little application :)
 app = Flask(__name__)
@@ -61,8 +61,6 @@ def teardown_request(exception):
 # show names of all friends in db
 @app.route('/')
 def show_friends():
-    if not session.get('logged_in'):
-        abort(401)
     friends = query_db('SELECT NAME FROM friends')
     return render_template('show_friends.html', friends=friends)
 
@@ -71,20 +69,32 @@ def show_friends():
 def refresh_friends():
     if not session.get('logged_in'):
         abort(401)
-    friends = query_db('SELECT NAME FROM friends')
-    token = generate_token()
-    req = requests.get('https://graph.facebook.com/me/friends?access_token=' + token)
+    friends = flatten_tuple(query_db('SELECT NAME FROM friends'))
+    # token = generate_token()
+    token = 'CAACEdEose0cBAPOGrAMKOTfHDMdAm8RDpHNhzqFZAggGXr4DvhvmIX1dWGA9Yg50zeKfKFN3GBAjvOAsxahCcdbsEZA4ItBkZCwBsJhlglco4cchi50GFvJEArR0Ff5BJ4aptUFZCDgwyqyVyHwdP2m0ACW4PAazEwDo6r3zcd6u1GzJ7dclhHZCLZCqirZAYT9c9WDf4GoSPCVvNumsYQtarSC7DJfOrIZD'
+    req = requests.get('https://graph.facebook.com/me/friends?access_token=' + token).json()
+    has_new_friends = False
     for friend in req['data']:
         if friend['name'] not in friends:
             g.db.execute('INSERT INTO friends (ID, NAME) VALUES (?, ?)',
-                         friend['id'], friend['name'])
+                         [friend['id'], friend['name']])
             g.db.commit()
-            flash('You made some new friends!')
+            has_new_friends = True
+    if has_new_friends:
+        flash('You made some new friends!')
+    else:
+        flash('No new friends for you Senor!')
     return redirect(url_for('show_friends'))
+
+def flatten_tuple(lst_of_tup):
+    lst = []
+    for tup in lst_of_tup:
+        lst.append(tup[0])
+    return lst
 
 # query db easily
 def query_db(query, args=(), one=False):
-    cur = get_db().execute(query, args)
+    cur = g.db.execute(query, args)
     rv = cur.fetchall()
     cur.close()
     return (rv[0] if rv else None) if one else rv
@@ -112,6 +122,8 @@ def login():
 # method to logout of app
 @app.route('/logout')
 def logout():
+    # empty friends table
+    g.db.execute('DELETE FROM friends')
     session.pop('logged_in', None)
     flash('You were logged out')
     return redirect(url_for('show_friends'))

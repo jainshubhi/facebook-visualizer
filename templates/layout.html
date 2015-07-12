@@ -13,5 +13,9 @@
   {% for message in get_flashed_messages() %}
     <div class=flash>{{ message }}</div>
   {% endfor %}
-  {% block body %}{% endblock %}
+  {% if session.logged_in %}
+    {% block body %}{% endblock %}
+  {% else %}
+    {% block login %}{% endblock %}
+  {% endif %}
 </div>
