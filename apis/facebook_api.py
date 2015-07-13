@@ -16,5 +16,10 @@ class FacebookApi(ACCESS_TOKEN):
     #     token = requests.get('https://www.facebook.com/dialog/oauth?client_id=' + oauth_token['APP_ID'] + '&redirect_uri=www.shubhijain.com')
 
 ################################################################################
+# Queries
+################################################################################
+    URL = 'https://graph.facebook.com/'
 
-    # Queries
+    # basic references
+    def get_node(self, name, *args):
+        return requests.get(URL + name).json()
