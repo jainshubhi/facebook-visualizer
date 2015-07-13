@@ -135,7 +135,6 @@ def graph():
                   'Y': 0,'Z': 0}
     for friend in friends:
             letter_map[friend[0]] += 1
-    print letter_map
     return render_template('show_graphs.html', data=letter_map)
 
 # fire up server

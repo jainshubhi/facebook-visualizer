@@ -1,12 +1,11 @@
 {% extends "layout.html" %}
 {% block body %}
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-  <script type="text/javascript" src="http://code.highcharts.com/highcharts.js"></script>
-  <script type="text/javascript" src="http://code.highcharts.com/modules/exporting.js"></script>
+  <script type="text/javascript" src="../static/jquery-2.1.4.min.js"></script>
+  <script type="text/javascript" src="../static/highcharts.js"></script>
+  <script type="text/javascript" src="../static/exporting.js"></script>
   <div id="container" style="width: 100%; height: 400px; margin: 0 auto"></div>
   <script type="text/javascript">
   var dict = {{ data|safe }};
-  console.log(dict)
   $(function () {
       $('#container').highcharts({
           chart: {
