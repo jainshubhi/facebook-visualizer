@@ -15,6 +15,7 @@ from flask import flash
 
 from contextlib import closing
 
+from apis import FacebookApi
 
 # flask configuration
 DATABASE = '/tmp/facebook.db'
