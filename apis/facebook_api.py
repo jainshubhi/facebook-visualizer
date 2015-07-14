@@ -16,8 +16,9 @@ class FacebookApi():
     #     oauth_token = self.extract_config()
     #     token = requests.get('https://www.facebook.com/dialog/oauth?client_id=' + oauth_token['APP_ID'] + '&redirect_uri=www.shubhijain.com')
 
-    def __init__(self, ACCESS_TOKEN):
+    def __init__(self, ACCESS_TOKEN, redirect_uri):
         self._ACCESS_TOKEN=ACCESS_TOKEN
+        self._redirect_uri=redirect_uri
 
     @property
     def ACCESS_TOKEN(self):
@@ -26,6 +27,14 @@ class FacebookApi():
     @ACCESS_TOKEN.setter
     def ACCESS_TOKEN(self, new_token):
         self._ACCESS_TOKEN = new_token
+
+    @property
+    def redirect_uri(self):
+        return self._redirect_uri
+
+    @redirect_uri.setter
+    def redirect_uri(self, uri):
+        self._redirect_uri = uri
 ################################################################################
 # Queries
 ################################################################################
