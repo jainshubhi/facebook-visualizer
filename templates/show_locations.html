@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block body %}
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script type="text/javascript" src="http://code.highcharts.com/maps/highmaps.js"></script>
+  <script type="text/javascript" src="http://code.highcharts.com/maps/modules/exporting.js"></script>
+  <script type="text/javascript" src="http://code.highcharts.com/mapdata/countries/us/us-all.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.6/proj4-src.js"></script>
+  <div id="container" style="width: 100%; height: 400px; margin: 0 auto"></div>
+  <script type="text/javascript">
+  var dict = {{ data|safe }};
+  console.log(dict)
+  $(function () {
+    // Initiate the chart
+    $('#container').highcharts('Map', {
+
+        title: {
+            text: 'My Facebook Check-ins'
+        },
+
+        mapNavigation: {
+            enabled: true
+        },
+
+        tooltip: {
+            headerFormat: '',
+            pointFormat: '<b>{point.name}</b><br>Lat: {point.lat}, Lon: {point.lon}'
+        },
+
+        series: [{
+            // Use the gb-all map with no data as a basemap
+            mapData: Highcharts.maps['countries/us/us-all'],
+            name: 'Basemap',
+            borderColor: '#A0A0A0',
+            nullColor: 'rgba(200, 200, 200, 0.3)',
+            showInLegend: false
+        }, {
+            name: 'Separators',
+            type: 'mapline',
+            data: Highcharts.geojson(Highcharts.maps['countries/us/us-all'], 'mapline'),
+            color: '#707070',
+            showInLegend: false,
+            enableMouseTracking: false
+        }, {
+            // Specify points using lat/lon
+            type: 'mappoint',
+            name: 'Cities',
+            color: Highcharts.getOptions().colors[1],
+            data: dict
+        }]
+    });
+  });
+</script>
+{% endblock %}

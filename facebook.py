@@ -15,7 +15,6 @@ from flask import flash
 
 from contextlib import closing
 
-from apis import FacebookApi
 
 # flask configuration
 DATABASE = '/tmp/facebook.db'
@@ -28,6 +27,7 @@ PASSWORD = 'default'
 # APP_ID =
 # APP_SECRET =
 # CLIENT_CREDENTIALS =
+TOKEN = 'CAACEdEose0cBABdZBpFBI7p0vdZCcmKcBvOUzBp7xF0Y9XM23TmMnSQPajIecmCZBQB9R3rCDpjkHKfvDOrhFMG6bnEkfgHo4puLyZCxHlvHowyza1fYdXWktxQsUPE3J58AC41KRGXRo8d5FJhODqwxXR3DaPPmDEduWVoVLmoo7jzZBlko8gDgjHvlJg5RKYRI2Pu9yBMuH2yJQa1zP6CXG34wdbxEZD'
 
 # create our little application :)
 app = Flask(__name__)
@@ -71,9 +71,8 @@ def refresh_friends():
     if not session.get('logged_in'):
         abort(401)
     friends = flatten_tuple(query_db('SELECT NAME FROM friends'))
-    # token = generate_token()
-    token = 'CAACEdEose0cBAJmhU9HGWjRC8ibHRMrXZA8vBbkh9fFNMKeB7ZBnrT1OsSZCyHLxq6FJhj7Sfy0U6ZC5pCFAuMjjq4Euddh2IezW1Ytg2ohUXBIMZCl9V7pfLH86GvcUMciT2m13YXWziTZChPLOFfH1tODlIKsgVz4N7JjOTx1qMY7RJpY03ZAZC525CmgA1cVNxaI74AKjZAxMNNB9ZCsJ1fCoT8XkW7KqoZD'
-    req = requests.get('https://graph.facebook.com/me/friends?access_token=' + token).json()
+    # TOKEN = generate_TOKEN()
+    req = requests.get('https://graph.facebook.com/me/friends?access_token=' + TOKEN).json()
     has_new_friends = False
     for friend in req['data']:
         if friend['name'] not in friends:
@@ -138,6 +137,22 @@ def graph():
             letter_map[friend[0]] += 1
     return render_template('show_graphs.html', data=letter_map)
 
+@app.route('/location')
+def locate():
+    s = requests.get('https://graph.facebook.com/me/tagged_places?access_token=' + TOKEN).json()
+    t = requests.get(s['paging']['next']).json()
+    s = dict(s.items() + t.items())
+    while 'next' in t['paging'].keys():
+        t = requests.get(t['paging']['next']).json()
+        s = dict(t.items() + s.items())
+    lst_of_locations = []
+    for place in s['data']:
+        location_dict = {'name':'', 'lat':0, 'lon':0}
+        location_dict['name'] = place['place']['name'].encode('UTF8')
+        location_dict['lat'] = place['place']['location']['latitude']
+        location_dict['lon'] = place['place']['location']['longitude']
+        lst_of_locations.append(location_dict)
+    return render_template('show_locations.html', data=lst_of_locations)
 # fire up server
 if __name__ == '__main__':
     app.run()
