@@ -27,7 +27,7 @@ PASSWORD = 'default'
 # APP_ID =
 # APP_SECRET =
 # CLIENT_CREDENTIALS =
-TOKEN = 'CAACEdEose0cBABdZBpFBI7p0vdZCcmKcBvOUzBp7xF0Y9XM23TmMnSQPajIecmCZBQB9R3rCDpjkHKfvDOrhFMG6bnEkfgHo4puLyZCxHlvHowyza1fYdXWktxQsUPE3J58AC41KRGXRo8d5FJhODqwxXR3DaPPmDEduWVoVLmoo7jzZBlko8gDgjHvlJg5RKYRI2Pu9yBMuH2yJQa1zP6CXG34wdbxEZD'
+TOKEN = 'CAACEdEose0cBADHrN0vLLAsXWu0Yd5jmGii3ZAO3sZABrmGv0juZC0Q8MKdvFWSavlzAJVfiXc1aZA97vZAPzqVhl80q5dVvtnqPwks7aCvGicmQ93qcybdPwbFVRHGLnZA0cSZAThkFgYCdFFTKd55yIIAFGPbySmQWh3FLg1Sx7yd7Rdh33AEKF5x4EtobibeMh7SY5LjF5nGxv7JxntQrArOim0RShIZD'
 
 # create our little application :)
 app = Flask(__name__)
@@ -125,7 +125,7 @@ def logout():
     return redirect(url_for('show_friends'))
 
 @app.route('/graph')
-def graph():
+def graph_name():
     friends = flatten_tuple(query_db('SELECT NAME FROM friends'))
     # Convert from unicode to UTF8
     friends = [x.encode('UTF8') for x in friends]
@@ -142,6 +142,7 @@ def locate():
     s = requests.get('https://graph.facebook.com/me/tagged_places?access_token=' + TOKEN).json()
     t = requests.get(s['paging']['next']).json()
     s = dict(s.items() + t.items())
+    # paging to get next items
     while 'next' in t['paging'].keys():
         t = requests.get(t['paging']['next']).json()
         s = dict(t.items() + s.items())
@@ -153,6 +154,23 @@ def locate():
         location_dict['lon'] = place['place']['location']['longitude']
         lst_of_locations.append(location_dict)
     return render_template('show_locations.html', data=lst_of_locations)
+
+@app.route('/friends/<field>')
+def friends_graph(field):
+    friends = flatten_tuple(query_db('SELECT ID FROM friends'))
+    val = {}
+    for friend in friends:
+        req = requests.get('https://graph.facebook.com/' + friend + '?fields=' + field).json()
+        lst = req[field]
+        # possibility for multiple values in each field
+        for el in lst:
+            # trying this out for devices first so that's why I'm using 'os'
+            if el['os'] not in val.keys():
+                val[el['os']] = 1
+            else:
+                val[el['os']] += 1
+    return render_template('show_friends_graphs.html', field=field, data=val)
+
 # fire up server
 if __name__ == '__main__':
     app.run()
