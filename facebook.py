@@ -27,7 +27,7 @@ PASSWORD = 'default'
 # APP_ID =
 # APP_SECRET =
 # CLIENT_CREDENTIALS =
-TOKEN = 'CAACEdEose0cBADHrN0vLLAsXWu0Yd5jmGii3ZAO3sZABrmGv0juZC0Q8MKdvFWSavlzAJVfiXc1aZA97vZAPzqVhl80q5dVvtnqPwks7aCvGicmQ93qcybdPwbFVRHGLnZA0cSZAThkFgYCdFFTKd55yIIAFGPbySmQWh3FLg1Sx7yd7Rdh33AEKF5x4EtobibeMh7SY5LjF5nGxv7JxntQrArOim0RShIZD'
+TOKEN = 'CAACEdEose0cBAPLIjOp5EhPCcz8WsL2FXwZC2prXqbCIKzbZAl271fTqqJgrkGlPmw6OdWINQ3blcjgTQmQXj9yHTpSPOobcmQM2hGM1ev4GVCMJfcF47SNtw3ChLZAl82ZB6Qr9PQSrn2yayRNjRUbLRmhLchAzR90aUsb75ZCJZAfasQgwft1MbZAtugwKX7s06hUBZB8RZAUDD9vuKeAZAeABdp7I9BMHAZD'
 
 # create our little application :)
 app = Flask(__name__)
@@ -86,19 +86,19 @@ def refresh_friends():
         flash('No new friends for you Senor!')
     return redirect(url_for('show_friends'))
 
-# query_db returns as a tuple with two elements (and empty last element)
-def flatten_tuple(lst_of_tup):
-    lst = []
-    for tup in lst_of_tup:
-        lst.append(tup[0])
-    return lst
-
 # query db easily
 def query_db(query, args=(), one=False):
     cur = g.db.execute(query, args)
     rv = cur.fetchall()
     cur.close()
     return (rv[0] if rv else None) if one else rv
+
+# query_db returns as a tuple with two elements (and empty last element)
+def flatten_tuple(lst_of_tup):
+    lst = []
+    for tup in lst_of_tup:
+        lst.append(tup[0])
+    return lst
 
 # method to login to app
 @app.route('/login', methods=['GET', 'POST'])
@@ -124,6 +124,7 @@ def logout():
     flash('You were logged out')
     return redirect(url_for('show_friends'))
 
+# method to graph the letters of the alphabet compared to friends' names
 @app.route('/graph')
 def graph_name():
     friends = flatten_tuple(query_db('SELECT NAME FROM friends'))
@@ -137,6 +138,7 @@ def graph_name():
             letter_map[friend[0]] += 1
     return render_template('show_graphs.html', data=letter_map)
 
+# method to map my checkins
 @app.route('/location')
 def locate():
     s = requests.get('https://graph.facebook.com/me/tagged_places?access_token=' + TOKEN).json()
@@ -155,21 +157,22 @@ def locate():
         lst_of_locations.append(location_dict)
     return render_template('show_locations.html', data=lst_of_locations)
 
+# method to map the variety of fields of all of my friends
 @app.route('/friends/<field>')
 def friends_graph(field):
-    friends = flatten_tuple(query_db('SELECT ID FROM friends'))
     val = {}
-    for friend in friends:
-        req = requests.get('https://graph.facebook.com/' + friend + '?fields=' + field).json()
-        lst = req[field]
-        # possibility for multiple values in each field
-        for el in lst:
-            # trying this out for devices first so that's why I'm using 'os'
-            if el['os'] not in val.keys():
-                val[el['os']] = 1
-            else:
-                val[el['os']] += 1
-    return render_template('show_friends_graphs.html', field=field, data=val)
+    req = requests.get('https://graph.facebook.com/me/friends?fields=' + field + '&access_token=' + TOKEN).json()['data']
+    for friend in req:
+        if field in friend.keys():
+            lst = friend[field]
+            # possibility for multiple values in each field
+            for el in lst:
+                # trying this out for devices first so that's why I'm using 'os'
+                if el[u'os'] not in val.keys():
+                    val[el[u'os'].encode('UTF8')] = 1
+                else:
+                    val[el[u'os'].encode('UTF8')] += 1
+    return render_template('show_friends_graphs.html', field=str(field), data=val)
 
 # fire up server
 if __name__ == '__main__':
